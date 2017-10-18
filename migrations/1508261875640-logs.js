@@ -5,9 +5,10 @@ exports.up = function (next) {
     [`create table logs (
     id uuid PRIMARY KEY,
     device_id text,
-    log_level text
+    log_level text,
     timestamp timestamptz,
-    message text`]
+    message text)`
+    ]
 
   db.multi(sql, next)
 }
