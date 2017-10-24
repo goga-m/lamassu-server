@@ -27525,6 +27525,9 @@ var _user$project$Css_Classes$NavBarItemActive = {ctor: 'NavBarItemActive'};
 var _user$project$Css_Classes$MainRight = {ctor: 'MainRight'};
 var _user$project$Css_Classes$MainLeft = {ctor: 'MainLeft'};
 var _user$project$Css_Classes$NavBar = {ctor: 'NavBar'};
+var _user$project$Css_Classes$ContentPane = {ctor: 'ContentPane'};
+var _user$project$Css_Classes$LeftPane = {ctor: 'LeftPane'};
+var _user$project$Css_Classes$PaneWrapper = {ctor: 'PaneWrapper'};
 var _user$project$Css_Classes$Main = {ctor: 'Main'};
 var _user$project$Css_Classes$Layout = {ctor: 'Layout'};
 
@@ -34128,10 +34131,25 @@ var _user$project$Customer_Types$Load = function (a) {
 	return {ctor: 'Load', _0: a};
 };
 
-var _user$project$Logs_Types$Log = F6(
-	function (a, b, c, d, e, f) {
-		return {id: a, deviceId: b, name: c, timestamp: d, logLevel: e, message: f};
+var _user$project$Logs_Types$Machine = F2(
+	function (a, b) {
+		return {deviceId: a, name: b};
 	});
+var _user$project$Logs_Types$Log = F5(
+	function (a, b, c, d, e) {
+		return {id: a, deviceId: b, timestamp: c, logLevel: d, message: e};
+	});
+var _user$project$Logs_Types$Logs = F2(
+	function (a, b) {
+		return {logs: a, currentMachine: b};
+	});
+var _user$project$Logs_Types$Model = F2(
+	function (a, b) {
+		return {logs: a, machines: b};
+	});
+var _user$project$Logs_Types$LoadMachines = function (a) {
+	return {ctor: 'LoadMachines', _0: a};
+};
 var _user$project$Logs_Types$LoadLogs = function (a) {
 	return {ctor: 'LoadLogs', _0: a};
 };
@@ -35502,6 +35520,19 @@ var _user$project$Customers_View$view = function (model) {
 	}
 };
 
+var _user$project$Logs_Decoder$machineDecoder = A3(
+	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+	'name',
+	_elm_lang$core$Json_Decode$string,
+	A3(
+		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+		'deviceId',
+		_elm_lang$core$Json_Decode$string,
+		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Logs_Types$Machine)));
+var _user$project$Logs_Decoder$machinesDecoder = A2(
+	_elm_lang$core$Json_Decode$field,
+	'machines',
+	_elm_lang$core$Json_Decode$list(_user$project$Logs_Decoder$machineDecoder));
 var _user$project$Logs_Decoder$logDecoder = A3(
 	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
 	'message',
@@ -35516,55 +35547,83 @@ var _user$project$Logs_Decoder$logDecoder = A3(
 			_elm_lang$core$Json_Decode$nullable(_elm_community$json_extra$Json_Decode_Extra$date),
 			A3(
 				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-				'name',
+				'deviceId',
 				_elm_lang$core$Json_Decode$nullable(_elm_lang$core$Json_Decode$string),
 				A3(
 					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-					'deviceId',
-					_elm_lang$core$Json_Decode$nullable(_elm_lang$core$Json_Decode$string),
-					A3(
-						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-						'id',
-						_elm_lang$core$Json_Decode$string,
-						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Logs_Types$Log)))))));
-var _user$project$Logs_Decoder$logsDecoder = A2(
-	_elm_lang$core$Json_Decode$field,
-	'logs',
-	_elm_lang$core$Json_Decode$list(_user$project$Logs_Decoder$logDecoder));
+					'id',
+					_elm_lang$core$Json_Decode$string,
+					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Logs_Types$Log))))));
+var _user$project$Logs_Decoder$logsDecoder = A3(
+	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+	'currentMachine',
+	_user$project$Logs_Decoder$machineDecoder,
+	A3(
+		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+		'logs',
+		_elm_lang$core$Json_Decode$list(_user$project$Logs_Decoder$logDecoder),
+		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Logs_Types$Logs)));
 
-var _user$project$Logs_Rest$getLogs = function (id) {
+var _user$project$Logs_Rest$getMachines = A2(
+	_elm_lang$core$Platform_Cmd$map,
+	_user$project$Logs_Types$LoadMachines,
+	_krisajenkins$remotedata$RemoteData$sendRequest(
+		A2(_elm_lang$http$Http$get, '/api/machines/', _user$project$Logs_Decoder$machinesDecoder)));
+var _user$project$Logs_Rest$getLogs = function (maybeId) {
 	return A2(
 		_elm_lang$core$Platform_Cmd$map,
 		_user$project$Logs_Types$LoadLogs,
-		A2(
-			_lukewestby$elm_http_builder$HttpBuilder$send,
-			_krisajenkins$remotedata$RemoteData$fromResult,
+		_krisajenkins$remotedata$RemoteData$sendRequest(
 			A2(
-				_lukewestby$elm_http_builder$HttpBuilder$withExpect,
-				_elm_lang$http$Http$expectJson(_user$project$Logs_Decoder$logsDecoder),
-				_lukewestby$elm_http_builder$HttpBuilder$get(
-					A2(_elm_lang$core$Basics_ops['++'], '/api/logs/', id)))));
+				_elm_lang$http$Http$get,
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					'/api/logs/',
+					A2(_elm_lang$core$Maybe$withDefault, '', maybeId)),
+				_user$project$Logs_Decoder$logsDecoder)));
 };
 
 var _user$project$Logs_State$update = F2(
 	function (msg, model) {
 		var _p0 = msg;
-		return A2(
-			_elm_lang$core$Platform_Cmd_ops['!'],
-			_p0._0,
-			{ctor: '[]'});
+		if (_p0.ctor === 'LoadLogs') {
+			return {
+				ctor: '_Tuple2',
+				_0: _elm_lang$core$Native_Utils.update(
+					model,
+					{logs: _p0._0}),
+				_1: _elm_lang$core$Platform_Cmd$none
+			};
+		} else {
+			return {
+				ctor: '_Tuple2',
+				_0: _elm_lang$core$Native_Utils.update(
+					model,
+					{machines: _p0._0}),
+				_1: _elm_lang$core$Platform_Cmd$none
+			};
+		}
 	});
-var _user$project$Logs_State$load = function (id) {
+var _user$project$Logs_State$getData = function (maybeId) {
+	return _elm_lang$core$Platform_Cmd$batch(
+		{
+			ctor: '::',
+			_0: _user$project$Logs_Rest$getLogs(maybeId),
+			_1: {
+				ctor: '::',
+				_0: _user$project$Logs_Rest$getMachines,
+				_1: {ctor: '[]'}
+			}
+		});
+};
+var _user$project$Logs_State$load = function (maybeId) {
 	return {
 		ctor: '_Tuple2',
-		_0: _krisajenkins$remotedata$RemoteData$Loading,
-		_1: _user$project$Logs_Rest$getLogs(id)
+		_0: {logs: _krisajenkins$remotedata$RemoteData$Loading, machines: _krisajenkins$remotedata$RemoteData$Loading},
+		_1: _user$project$Logs_State$getData(maybeId)
 	};
 };
-var _user$project$Logs_State$loadCmd = function (id) {
-	return _user$project$Logs_Rest$getLogs(id);
-};
-var _user$project$Logs_State$init = _krisajenkins$remotedata$RemoteData$NotAsked;
+var _user$project$Logs_State$init = {logs: _krisajenkins$remotedata$RemoteData$NotAsked, machines: _krisajenkins$remotedata$RemoteData$NotAsked};
 
 var _user$project$Logs_View$maybeText = function (maybeString) {
 	return _elm_lang$html$Html$text(
@@ -35594,7 +35653,8 @@ var _user$project$Logs_View$rowView = function (log) {
 				{ctor: '[]'},
 				{
 					ctor: '::',
-					_0: _user$project$Logs_View$maybeText(log.name),
+					_0: _elm_lang$html$Html$text(
+						_user$project$Logs_View$formatDate(log.timestamp)),
 					_1: {ctor: '[]'}
 				}),
 			_1: {
@@ -35604,8 +35664,7 @@ var _user$project$Logs_View$rowView = function (log) {
 					{ctor: '[]'},
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(
-							_user$project$Logs_View$formatDate(log.timestamp)),
+						_0: _user$project$Logs_View$maybeText(log.logLevel),
 						_1: {ctor: '[]'}
 					}),
 				_1: {
@@ -35615,27 +35674,16 @@ var _user$project$Logs_View$rowView = function (log) {
 						{ctor: '[]'},
 						{
 							ctor: '::',
-							_0: _user$project$Logs_View$maybeText(log.logLevel),
+							_0: _user$project$Logs_View$maybeText(log.message),
 							_1: {ctor: '[]'}
 						}),
-					_1: {
-						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$td,
-							{ctor: '[]'},
-							{
-								ctor: '::',
-								_0: _user$project$Logs_View$maybeText(log.message),
-								_1: {ctor: '[]'}
-							}),
-						_1: {ctor: '[]'}
-					}
+					_1: {ctor: '[]'}
 				}
 			}
 		});
 };
-var _user$project$Logs_View$tableView = function (logs) {
-	return _elm_lang$core$List$isEmpty(logs) ? A2(
+var _user$project$Logs_View$logsView = function (logs) {
+	return _elm_lang$core$List$isEmpty(logs.logs) ? A2(
 		_elm_lang$html$Html$div,
 		{ctor: '[]'},
 		{
@@ -35648,11 +35696,11 @@ var _user$project$Logs_View$tableView = function (logs) {
 		{
 			ctor: '::',
 			_0: A2(
-				_elm_lang$html$Html$h1,
+				_elm_lang$html$Html$h2,
 				{ctor: '[]'},
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html$text('Latest logs'),
+					_0: _elm_lang$html$Html$text('Logs'),
 					_1: {ctor: '[]'}
 				}),
 			_1: {
@@ -35686,7 +35734,7 @@ var _user$project$Logs_View$tableView = function (logs) {
 											{ctor: '[]'},
 											{
 												ctor: '::',
-												_0: _elm_lang$html$Html$text('Machine'),
+												_0: _elm_lang$html$Html$text('Date'),
 												_1: {ctor: '[]'}
 											}),
 										_1: {
@@ -35696,7 +35744,7 @@ var _user$project$Logs_View$tableView = function (logs) {
 												{ctor: '[]'},
 												{
 													ctor: '::',
-													_0: _elm_lang$html$Html$text('Date'),
+													_0: _elm_lang$html$Html$text('Level'),
 													_1: {ctor: '[]'}
 												}),
 											_1: {
@@ -35706,21 +35754,10 @@ var _user$project$Logs_View$tableView = function (logs) {
 													{ctor: '[]'},
 													{
 														ctor: '::',
-														_0: _elm_lang$html$Html$text('Level'),
+														_0: _elm_lang$html$Html$text('Message'),
 														_1: {ctor: '[]'}
 													}),
-												_1: {
-													ctor: '::',
-													_0: A2(
-														_elm_lang$html$Html$td,
-														{ctor: '[]'},
-														{
-															ctor: '::',
-															_0: _elm_lang$html$Html$text('Message'),
-															_1: {ctor: '[]'}
-														}),
-													_1: {ctor: '[]'}
-												}
+												_1: {ctor: '[]'}
 											}
 										}
 									}),
@@ -35731,7 +35768,7 @@ var _user$project$Logs_View$tableView = function (logs) {
 							_0: A2(
 								_elm_lang$html$Html$tbody,
 								{ctor: '[]'},
-								A2(_elm_lang$core$List$map, _user$project$Logs_View$rowView, logs)),
+								A2(_elm_lang$core$List$map, _user$project$Logs_View$rowView, logs.logs)),
 							_1: {ctor: '[]'}
 						}
 					}),
@@ -35739,8 +35776,8 @@ var _user$project$Logs_View$tableView = function (logs) {
 			}
 		});
 };
-var _user$project$Logs_View$view = function (model) {
-	var _p1 = model;
+var _user$project$Logs_View$logs = function (model) {
+	var _p1 = model.logs;
 	switch (_p1.ctor) {
 		case 'NotAsked':
 			return A2(
@@ -35749,11 +35786,11 @@ var _user$project$Logs_View$view = function (model) {
 				{ctor: '[]'});
 		case 'Loading':
 			return A2(
-				_elm_lang$html$Html$div,
+				_elm_lang$html$Html$h2,
 				{ctor: '[]'},
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html$text('Loading...'),
+					_0: _elm_lang$html$Html$text('Loading logs...'),
 					_1: {ctor: '[]'}
 				});
 		case 'Failure':
@@ -35772,7 +35809,7 @@ var _user$project$Logs_View$view = function (model) {
 				{ctor: '[]'},
 				{
 					ctor: '::',
-					_0: _user$project$Logs_View$tableView(_p1._0),
+					_0: _user$project$Logs_View$logsView(_p1._0),
 					_1: {ctor: '[]'}
 				});
 	}
@@ -35814,6 +35851,16 @@ var _user$project$Logs_View$machineRowView = function (machine) {
 			_1: {ctor: '[]'}
 		});
 };
+var _user$project$Logs_View$machineItemView = function (machine) {
+	return A2(
+		_elm_lang$html$Html$li,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: _user$project$Logs_View$machineLink(machine),
+			_1: {ctor: '[]'}
+		});
+};
 var _user$project$Logs_View$machinesView = function (machines) {
 	return _elm_lang$core$List$isEmpty(machines) ? A2(
 		_elm_lang$html$Html$div,
@@ -35837,17 +35884,17 @@ var _user$project$Logs_View$machinesView = function (machines) {
 		{
 			ctor: '::',
 			_0: A2(
-				_elm_lang$html$Html$h1,
+				_elm_lang$html$Html$h2,
 				{ctor: '[]'},
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html$text('Paired Machines'),
+					_0: _elm_lang$html$Html$text('Machines'),
 					_1: {ctor: '[]'}
 				}),
 			_1: {
 				ctor: '::',
 				_0: A2(
-					_elm_lang$html$Html$table,
+					_elm_lang$html$Html$div,
 					{
 						ctor: '::',
 						_0: _user$project$Css_Admin$class(
@@ -35861,33 +35908,119 @@ var _user$project$Logs_View$machinesView = function (machines) {
 					{
 						ctor: '::',
 						_0: A2(
-							_elm_lang$html$Html$thead,
+							_elm_lang$html$Html$ul,
 							{ctor: '[]'},
+							A2(_elm_lang$core$List$map, _user$project$Logs_View$machineItemView, machines)),
+						_1: {ctor: '[]'}
+					}),
+				_1: {ctor: '[]'}
+			}
+		});
+};
+var _user$project$Logs_View$machines = function (model) {
+	var _p2 = model.machines;
+	switch (_p2.ctor) {
+		case 'NotAsked':
+			return A2(
+				_elm_lang$html$Html$div,
+				{ctor: '[]'},
+				{ctor: '[]'});
+		case 'Loading':
+			return A2(
+				_elm_lang$html$Html$h2,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('Loading machines ...'),
+					_1: {ctor: '[]'}
+				});
+		case 'Failure':
+			return A2(
+				_elm_lang$html$Html$div,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(
+						_elm_lang$core$Basics$toString(_p2._0)),
+					_1: {ctor: '[]'}
+				});
+		default:
+			return A2(
+				_elm_lang$html$Html$div,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _user$project$Logs_View$machinesView(_p2._0),
+					_1: {ctor: '[]'}
+				});
+	}
+};
+var _user$project$Logs_View$view = function (model) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$h1,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('Latest Logs'),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _user$project$Css_Admin$class(
 							{
 								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$tr,
-									{ctor: '[]'},
+								_0: _user$project$Css_Classes$PaneWrapper,
+								_1: {ctor: '[]'}
+							}),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _user$project$Css_Admin$class(
 									{
 										ctor: '::',
-										_0: A2(
-											_elm_lang$html$Html$td,
-											{ctor: '[]'},
-											{
-												ctor: '::',
-												_0: _elm_lang$html$Html$text('Name'),
-												_1: {ctor: '[]'}
-											}),
+										_0: _user$project$Css_Classes$LeftPane,
 										_1: {ctor: '[]'}
 									}),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: _user$project$Logs_View$machines(model),
 								_1: {ctor: '[]'}
 							}),
 						_1: {
 							ctor: '::',
 							_0: A2(
-								_elm_lang$html$Html$tbody,
-								{ctor: '[]'},
-								A2(_elm_lang$core$List$map, _user$project$Logs_View$machineRowView, machines)),
+								_elm_lang$html$Html$div,
+								{
+									ctor: '::',
+									_0: _user$project$Css_Admin$class(
+										{
+											ctor: '::',
+											_0: _user$project$Css_Classes$ContentPane,
+											_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								},
+								{
+									ctor: '::',
+									_0: _user$project$Logs_View$logs(model),
+									_1: {ctor: '[]'}
+								}),
 							_1: {ctor: '[]'}
 						}
 					}),
@@ -36025,7 +36158,10 @@ var _user$project$NavBar$routeToUrl = function (route) {
 		case 'CustomerRoute':
 			return A2(_elm_lang$core$Basics_ops['++'], '/#customer/', _p1._0);
 		case 'LogsRoute':
-			return A2(_elm_lang$core$Basics_ops['++'], '/#logs/', _p1._0);
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				'/#logs/',
+				A2(_elm_lang$core$Maybe$withDefault, '', _p1._0));
 		default:
 			return _elm_lang$core$Native_Utils.crashCase(
 				'NavBar',
@@ -37992,7 +38128,10 @@ var _user$project$Main$parseRoute = _evancz$url_parser$UrlParser$oneOf(
 													ctor: '::',
 													_0: A2(
 														_evancz$url_parser$UrlParser$map,
-														_user$project$CoreTypes$LogsRoute,
+														function (id) {
+															return _user$project$CoreTypes$LogsRoute(
+																_elm_lang$core$Maybe$Just(id));
+														},
 														A2(
 															_evancz$url_parser$UrlParser_ops['</>'],
 															_evancz$url_parser$UrlParser$s('logs'),
@@ -38001,9 +38140,16 @@ var _user$project$Main$parseRoute = _evancz$url_parser$UrlParser$oneOf(
 														ctor: '::',
 														_0: A2(
 															_evancz$url_parser$UrlParser$map,
-															A2(_user$project$CoreTypes$ConfigRoute, 'setup', _elm_lang$core$Maybe$Nothing),
-															_evancz$url_parser$UrlParser$top),
-														_1: {ctor: '[]'}
+															_user$project$CoreTypes$LogsRoute(_elm_lang$core$Maybe$Nothing),
+															_evancz$url_parser$UrlParser$s('logs')),
+														_1: {
+															ctor: '::',
+															_0: A2(
+																_evancz$url_parser$UrlParser$map,
+																A2(_user$project$CoreTypes$ConfigRoute, 'setup', _elm_lang$core$Maybe$Nothing),
+																_evancz$url_parser$UrlParser$top),
+															_1: {ctor: '[]'}
+														}
 													}
 												}
 											}
