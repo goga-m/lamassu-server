@@ -34135,9 +34135,9 @@ var _user$project$Logs_Types$Machine = F2(
 	function (a, b) {
 		return {deviceId: a, name: b};
 	});
-var _user$project$Logs_Types$Log = F5(
-	function (a, b, c, d, e) {
-		return {id: a, deviceId: b, timestamp: c, logLevel: d, message: e};
+var _user$project$Logs_Types$Log = F4(
+	function (a, b, c, d) {
+		return {id: a, timestamp: b, logLevel: c, message: d};
 	});
 var _user$project$Logs_Types$Logs = F2(
 	function (a, b) {
@@ -35547,13 +35547,9 @@ var _user$project$Logs_Decoder$logDecoder = A3(
 			_elm_lang$core$Json_Decode$nullable(_elm_community$json_extra$Json_Decode_Extra$date),
 			A3(
 				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-				'deviceId',
-				_elm_lang$core$Json_Decode$nullable(_elm_lang$core$Json_Decode$string),
-				A3(
-					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-					'id',
-					_elm_lang$core$Json_Decode$string,
-					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Logs_Types$Log))))));
+				'id',
+				_elm_lang$core$Json_Decode$string,
+				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Logs_Types$Log)))));
 var _user$project$Logs_Decoder$logsDecoder = A3(
 	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
 	'currentMachine',
