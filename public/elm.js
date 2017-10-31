@@ -28244,9 +28244,13 @@ var _user$project$Common_Logs_Types$Log = F4(
 	function (a, b, c, d) {
 		return {id: a, timestamp: b, logLevel: c, message: d};
 	});
+var _user$project$Common_Logs_Types$SupportLogSnapshot = F2(
+	function (a, b) {
+		return {deviceId: a, timestamp: b};
+	});
 var _user$project$Common_Logs_Types$SupportLog = F3(
 	function (a, b, c) {
-		return {id: a, deviceId: b, timestamp: c};
+		return {deviceId: a, timestamp: b, name: c};
 	});
 var _user$project$Common_Logs_Types$Logs = F2(
 	function (a, b) {
@@ -28268,17 +28272,26 @@ var _user$project$Common_Logs_Decoder$machinesDecoder = A2(
 	_elm_lang$core$Json_Decode$list(_user$project$Common_Logs_Decoder$machineDecoder));
 var _user$project$Common_Logs_Decoder$supportLogDecoder = A3(
 	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+	'name',
+	_elm_lang$core$Json_Decode$string,
+	A3(
+		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+		'timestamp',
+		_elm_community$json_extra$Json_Decode_Extra$date,
+		A3(
+			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+			'deviceId',
+			_elm_lang$core$Json_Decode$string,
+			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Common_Logs_Types$SupportLog))));
+var _user$project$Common_Logs_Decoder$latestLogSnapshotDecoder = A3(
+	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
 	'timestamp',
 	_elm_community$json_extra$Json_Decode_Extra$date,
 	A3(
 		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
 		'deviceId',
 		_elm_lang$core$Json_Decode$string,
-		A3(
-			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-			'id',
-			_elm_lang$core$Json_Decode$string,
-			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Common_Logs_Types$SupportLog))));
+		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Common_Logs_Types$SupportLogSnapshot)));
 var _user$project$Common_Logs_Decoder$supportLogsDecoder = A2(
 	_elm_lang$core$Json_Decode$field,
 	'supportLogs',
@@ -34207,7 +34220,7 @@ var _user$project$Customer_Types$Load = function (a) {
 
 var _user$project$Logs_Types$Model = F3(
 	function (a, b, c) {
-		return {logs: a, machines: b, supportLog: c};
+		return {logs: a, machines: b, latestLogSnapshot: c};
 	});
 var _user$project$Logs_Types$LoadSupportLog = function (a) {
 	return {ctor: 'LoadSupportLog', _0: a};
@@ -35614,7 +35627,7 @@ var _user$project$Logs_Rest$shareLogs = function (id) {
 			_krisajenkins$remotedata$RemoteData$fromResult,
 			A2(
 				_lukewestby$elm_http_builder$HttpBuilder$withExpect,
-				_elm_lang$http$Http$expectJson(_user$project$Common_Logs_Decoder$supportLogDecoder),
+				_elm_lang$http$Http$expectJson(_user$project$Common_Logs_Decoder$latestLogSnapshotDecoder),
 				_lukewestby$elm_http_builder$HttpBuilder$post(
 					A2(_elm_lang$core$Basics_ops['++'], '/api/support_logs?deviceId=', id)))));
 };
@@ -35671,7 +35684,7 @@ var _user$project$Logs_State$update = F2(
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{supportLog: _p0._0}),
+						{latestLogSnapshot: _p0._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 		}
@@ -35691,14 +35704,14 @@ var _user$project$Logs_State$getData = function (maybeId) {
 var _user$project$Logs_State$load = function (maybeId) {
 	return {
 		ctor: '_Tuple2',
-		_0: {logs: _krisajenkins$remotedata$RemoteData$Loading, machines: _krisajenkins$remotedata$RemoteData$Loading, supportLog: _krisajenkins$remotedata$RemoteData$NotAsked},
+		_0: {logs: _krisajenkins$remotedata$RemoteData$Loading, machines: _krisajenkins$remotedata$RemoteData$Loading, latestLogSnapshot: _krisajenkins$remotedata$RemoteData$NotAsked},
 		_1: _user$project$Logs_State$getData(maybeId)
 	};
 };
-var _user$project$Logs_State$init = {logs: _krisajenkins$remotedata$RemoteData$NotAsked, machines: _krisajenkins$remotedata$RemoteData$NotAsked, supportLog: _krisajenkins$remotedata$RemoteData$NotAsked};
+var _user$project$Logs_State$init = {logs: _krisajenkins$remotedata$RemoteData$NotAsked, machines: _krisajenkins$remotedata$RemoteData$NotAsked, latestLogSnapshot: _krisajenkins$remotedata$RemoteData$NotAsked};
 
 var _user$project$Logs_View$latestLogSnapshot = function (model) {
-	var _p0 = model.supportLog;
+	var _p0 = model.latestLogSnapshot;
 	switch (_p0.ctor) {
 		case 'NotAsked':
 			return A2(
@@ -36397,18 +36410,28 @@ var _user$project$SupportLogs_View$logs = function (model) {
 				});
 	}
 };
+var _user$project$SupportLogs_View$supportLogText = function (supportLog) {
+	return _elm_lang$html$Html$text(
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			supportLog.name,
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				' ',
+				A2(_justinmimbs$elm_date_extra$Date_Extra$toFormattedString, 'yyyy-MM-dd HH:mm', supportLog.timestamp))));
+};
 var _user$project$SupportLogs_View$supportLogLink = function (supportLog) {
 	return A2(
 		_elm_lang$html$Html$a,
 		{
 			ctor: '::',
 			_0: _elm_lang$html$Html_Attributes$href(
-				A2(_elm_lang$core$Basics_ops['++'], '/#logs/', supportLog.deviceId)),
+				A2(_elm_lang$core$Basics_ops['++'], '/#support_logs/', supportLog.deviceId)),
 			_1: {ctor: '[]'}
 		},
 		{
 			ctor: '::',
-			_0: _elm_lang$html$Html$text(supportLog.deviceId),
+			_0: _user$project$SupportLogs_View$supportLogText(supportLog),
 			_1: {ctor: '[]'}
 		});
 };
@@ -36516,7 +36539,7 @@ var _user$project$SupportLogs_View$view = function (model) {
 				{ctor: '[]'},
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html$text('Latest Logs'),
+					_0: _elm_lang$html$Html$text('Lamassu support logs'),
 					_1: {ctor: '[]'}
 				}),
 			_1: {
@@ -36554,7 +36577,7 @@ var _user$project$SupportLogs_View$view = function (model) {
 									{ctor: '[]'},
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html$text('Machines'),
+										_0: _elm_lang$html$Html$text('Shared snapshots'),
 										_1: {ctor: '[]'}
 									}),
 								_1: {
