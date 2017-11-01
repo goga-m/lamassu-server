@@ -28248,9 +28248,9 @@ var _user$project$Common_Logs_Types$SupportLogSnapshot = F2(
 	function (a, b) {
 		return {deviceId: a, timestamp: b};
 	});
-var _user$project$Common_Logs_Types$SupportLog = F3(
-	function (a, b, c) {
-		return {deviceId: a, timestamp: b, name: c};
+var _user$project$Common_Logs_Types$SupportLog = F4(
+	function (a, b, c, d) {
+		return {id: a, deviceId: b, timestamp: c, name: d};
 	});
 var _user$project$Common_Logs_Types$Logs = F2(
 	function (a, b) {
@@ -28282,7 +28282,11 @@ var _user$project$Common_Logs_Decoder$supportLogDecoder = A3(
 			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
 			'deviceId',
 			_elm_lang$core$Json_Decode$string,
-			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Common_Logs_Types$SupportLog))));
+			A3(
+				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+				'id',
+				_elm_lang$core$Json_Decode$string,
+				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Common_Logs_Types$SupportLog)))));
 var _user$project$Common_Logs_Decoder$latestLogSnapshotDecoder = A3(
 	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
 	'timestamp',
@@ -36185,7 +36189,7 @@ var _user$project$SupportLogs_Rest$getAllLogs = function (maybeId) {
 				_elm_lang$http$Http$get,
 				A2(
 					_elm_lang$core$Basics_ops['++'],
-					'/api/logs/',
+					'/api/support_logs/logs?supportLogId=',
 					A2(_elm_lang$core$Maybe$withDefault, '', maybeId)),
 				_user$project$Common_Logs_Decoder$logsDecoder)));
 };
@@ -36426,7 +36430,7 @@ var _user$project$SupportLogs_View$supportLogLink = function (supportLog) {
 		{
 			ctor: '::',
 			_0: _elm_lang$html$Html_Attributes$href(
-				A2(_elm_lang$core$Basics_ops['++'], '/#support_logs/', supportLog.deviceId)),
+				A2(_elm_lang$core$Basics_ops['++'], '/#support_logs/', supportLog.id)),
 			_1: {ctor: '[]'}
 		},
 		{
